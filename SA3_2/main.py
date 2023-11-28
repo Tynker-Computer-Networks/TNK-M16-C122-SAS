@@ -4,7 +4,7 @@ import socket
 import multiprocessing
 
 
-def ddos_attack(ip_address, port, number_of_sockets, ):
+def ddos_attack(ip_address, port, number_of_sockets):
     try:
         sockets = []
         for i in range(number_of_sockets):

